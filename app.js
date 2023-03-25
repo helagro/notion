@@ -3,14 +3,11 @@ const fs = require('fs')
 const path = require('path')
 const express = require('express')
 
-//const CONTENT_KEY = "msg"
 const port = 3000;
 
 const app = express()
-//app.use(express.json())
 const bodyParser = require('body-parser')
 app.use(bodyParser.text())
-//app.use(express.urlencoded({ extended: true }))
 
 
 const env = (function(){
