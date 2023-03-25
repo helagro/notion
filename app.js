@@ -8,7 +8,9 @@ const port = 3000;
 
 const app = express()
 //app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+const bodyParser = require('body-parser')
+app.use(bodyParser.text())
+//app.use(express.urlencoded({ extended: true }))
 
 
 const env = (function(){
@@ -26,15 +28,18 @@ const notion = new Client({
 app.post('', (req, res) => {
     const input = req.body
 
-    console.log(input)
-    processInput(input)
-    res.send('Data received: ' + input)
+    console.log("input:", input)
+    const response = processInput(input)
+    res.send(`input: ${input}\nresponse:${response}`)
 })
 
 function processInput(input){
-    const [DBkey, content] = input.split(' ', 2);
+    const [DBkey, ...content] = input.split(' ')
     const DB = env["DBs"][DBkey]
-    createRow(DB, content)
+
+    if(DB == null) return "invalid DB"
+
+    createRow(DB, content.join(" "))
 }
 
 
