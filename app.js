@@ -32,7 +32,7 @@ app.post('', (req, res) => {
 })
 
 function processInput(input){
-    const [DBkey, content] = str.split(' ', 2);
+    const [DBkey, content] = input.split(' ', 2);
     const DB = env["DBs"][DBkey]
     createRow(DB, content)
 }
