@@ -3,12 +3,12 @@ const fs = require('fs')
 const path = require('path')
 const express = require('express')
 
-const CONTENT_KEY = "msg"
+//const CONTENT_KEY = "msg"
 const port = 3000;
 
 const app = express()
-app.use(express.json())
-//app.use(express.urlencoded({ extended: true }))
+//app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 
 const env = (function(){
@@ -24,13 +24,21 @@ const notion = new Client({
 
 
 app.post('', (req, res) => {
-    console.log(req.body[CONTENT_KEY])
-    createRow(req.body[CONTENT_KEY])
-    res.send('Data received: ' + req.body[CONTENT_KEY])
+    const input = req.body
+
+    console.log(input)
+    processInput(input)
+    res.send('Data received: ' + input)
 })
 
+function processInput(input){
+    const [DBkey, content] = str.split(' ', 2);
+    const DB = env["DBs"][DBkey]
+    createRow(DB, content)
+}
 
-function createRow(title){
+
+function createRow(db, title){
     const newEntry = {
         title: [
             {
@@ -44,7 +52,7 @@ function createRow(title){
     notion.pages.create({
         properties: newEntry,
         parent: {
-            database_id: env["db"]
+            database_id: db
         }
     
     })
