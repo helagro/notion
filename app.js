@@ -3,12 +3,12 @@ const fs = require('fs')
 const path = require('path')
 const express = require('express')
 
-const app = express()
-const hostname = '0.0.0.0'
+const CONTENT_KEY = "msg"
 const port = 3000;
 
-//app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+const app = express()
+app.use(express.json())
+//app.use(express.urlencoded({ extended: true }))
 
 
 const env = (function(){
@@ -24,15 +24,10 @@ const notion = new Client({
 
 
 app.post('', (req, res) => {
-    console.log(req.body)
-    res.send('Data received')
+    console.log(req.body[CONTENT_KEY])
+    createRow(req.body[CONTENT_KEY])
+    res.send('Data received: ' + req.body[CONTENT_KEY])
 })
-
-
-function onRecievedData(data){
-    console.log(`recieved ${data}`)
-    createRow(data)
-}
 
 
 function createRow(title){
