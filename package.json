@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@notionhq/client": "^2.2.3"
+    "@notionhq/client": "^2.2.3",
+    "express": "^4.18.2"
   }
 }

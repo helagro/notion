@@ -1,11 +1,14 @@
 const { Client } = require("@notionhq/client")
 const fs = require('fs')
 const path = require('path')
-const http = require('http');
+const express = require('express')
 
-const hostname = '0.0.0.0';
+const app = express()
+const hostname = '0.0.0.0'
 const port = 3000;
 
+//app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 
 const env = (function(){
@@ -20,26 +23,10 @@ const notion = new Client({
 })
 
 
-const server = http.createServer((req, res) => {
-    if (req.method === 'POST') {
-        let body = '';
-    
-        req.on('data', chunk => {
-          body += chunk.toString();
-        });
-    
-        req.on('end', () => {
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'text/plain');
-          res.end(`Received request body: ${body}`);
-          onRecievedData(body)
-        });
-      } else {
-        res.statusCode = 404;
-        res.end();
-      }
-});
-
+app.post('', (req, res) => {
+    console.log(req.body)
+    res.send('Data received')
+})
 
 
 function onRecievedData(data){
@@ -70,6 +57,8 @@ function createRow(title){
 
 
 
-server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);   
-});
+
+
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+})
