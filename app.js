@@ -37,6 +37,7 @@ function processInput(input){
     if(DB == null) return "invalid DB"
 
     createRow(DB, content.join(" "))
+    return "success"
 }
 
 
