@@ -54,12 +54,12 @@ function getDB(DBkey){
 
 function createRow(DB, items){
     const columns = DB["columns"]
+    const createColumnAmt = Math.min(columns.length, items.length-1)
     const properties = {}
-
 
     addColumn(properties, "title", "title", items[0])
 
-    for(let i = 0; i < items.length; i++)
+    for(let i = 0; i < createColumnAmt; i++)
         addColumn(properties, columns[i], "rich_text", items[i + 1])
 
         
