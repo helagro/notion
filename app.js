@@ -29,6 +29,7 @@ app.post('', (req, res) => {
     res.send(`input: ${input}\nresponse:${response}`)
 })
 
+
 function processInput(input){
     const [DBkey, ...content] = input.split(' ')
     const DB = getDB(DBkey)
@@ -36,8 +37,8 @@ function processInput(input){
     if(DB == null) return "invalid DB"
 
     const contentStr = content.join(" ")
-    const [title, contentItems] = contentStr.split("|")
-    createRow(DB, title, contentItems)
+    const items = contentStr.split("|")
+    createRow(DB, items)
 
 
     return "success"
@@ -51,35 +52,34 @@ function getDB(DBkey){
 }
 
 
-function createRow(DB, title, contentItems){
-    const newEntry = {
-        title: [
-            {
-                text: {
-                    content: title
-                }
-            }
-        ]
-    }
+function createRow(DB, items){
+    const columns = DB["columns"]
+    const properties = {}
 
-    
-    
+
+    addColumn(properties, columns[0], "title", items[0])
+
+    for(let i = 1; i < items.length; i++)
+        addColumn(properties, columns[i], "rich_text", items[i])
+
+        
     notion.pages.create({
-        properties: newEntry,
+        properties: properties,
         parent: {
             database_id: DB["id"]
         }
-    
     })
 }
 
-function createColumn(name, content){
-    const column = {}
-    column["name"] = {
-        type: "rich_text"
+
+function addColumn(properties, name, type, content){
+    properties[name] = {
+        "type": type,
+        [type]: [
+            { "type": "text", "text": { "content": content } }
+        ]
     }
 }
-
 
 
 // ========== START ==========
