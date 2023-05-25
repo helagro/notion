@@ -57,10 +57,10 @@ function createRow(DB, items){
     const properties = {}
 
 
-    addColumn(properties, columns[0], "title", items[0])
+    addColumn(properties, "title", "title", items[0])
 
-    for(let i = 1; i < items.length; i++)
-        addColumn(properties, columns[i], "rich_text", items[i])
+    for(let i = 0; i < items.length; i++)
+        addColumn(properties, columns[i], "rich_text", items[i + 1])
 
         
     notion.pages.create({
