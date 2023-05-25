@@ -35,7 +35,11 @@ function processInput(input){
 
     if(DB == null) return "invalid DB"
 
-    createRow(DB["id"], content.join(" "))
+    const contentStr = content.join(" ")
+    const [title, contentItems] = contentStr.split("|")
+    createRow(DB, title, contentItems)
+
+
     return "success"
 }
 
@@ -47,24 +51,33 @@ function getDB(DBkey){
 }
 
 
-function createRow(ID, title){
+function createRow(DB, title, contentItems){
     const newEntry = {
         title: [
             {
                 text: {
-                content: title
+                    content: title
                 }
             }
         ]
     }
+
+    
     
     notion.pages.create({
         properties: newEntry,
         parent: {
-            database_id: ID
+            database_id: DB["id"]
         }
     
     })
+}
+
+function createColumn(name, content){
+    const column = {}
+    column["name"] = {
+        type: "rich_text"
+    }
 }
 
 
