@@ -16,7 +16,6 @@ const env = (function(){
     return JSON.parse(envStr)
 })()
 
-
 const notion = new Client({
   auth: env["secret"],
 })
@@ -32,16 +31,23 @@ app.post('', (req, res) => {
 
 function processInput(input){
     const [DBkey, ...content] = input.split(' ')
-    const DB = env["DBs"][DBkey]
+    const DB = getDB(DBkey)
 
     if(DB == null) return "invalid DB"
 
-    createRow(DB, content.join(" "))
+    createRow(DB["id"], content.join(" "))
     return "success"
 }
 
 
-function createRow(db, title){
+function getDB(DBkey){
+    for(const DB of env["DBs"]){
+        if(DB["name"] == DBkey) return DB
+    }
+}
+
+
+function createRow(ID, title){
     const newEntry = {
         title: [
             {
@@ -55,7 +61,7 @@ function createRow(db, title){
     notion.pages.create({
         properties: newEntry,
         parent: {
-            database_id: db
+            database_id: ID
         }
     
     })
@@ -63,7 +69,7 @@ function createRow(db, title){
 
 
 
-
+// ========== START ==========
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
