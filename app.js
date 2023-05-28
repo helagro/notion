@@ -4,13 +4,13 @@ const path = require('path')
 const rl = require('readline-sync')
 
 
-const envPromise = (async function(){
+const envPromise = (async function () {
     const envPath = path.join(__dirname, 'env.json')
     const envStr = fs.readFileSync(envPath, 'utf8').trim()
     return JSON.parse(envStr)
 })()
 
-const notionPromise = (async function(){
+const notionPromise = (async function () {
     const env = await envPromise
     return new Client({
         auth: env["secret"],
@@ -19,7 +19,7 @@ const notionPromise = (async function(){
 
 
 
-async function main(){
+async function main() {
     const DBname = await selectDB()
     const DBpromise = getDB(DBname)
 
@@ -31,16 +31,16 @@ async function main(){
 }
 
 
-async function selectDB(){
+async function selectDB() {
     const DB = rl.question(`Select DB: `)
 
     const env = await envPromise
     const availableDBs = env["DBs"].map(DB => DB["name"])
 
     const isDBvalid = availableDBs.includes(DB)
-    if(!isDBvalid){
+    if (!isDBvalid) {
         const availableDBsStr = availableDBs.join(", ")
-        console.log(`Invalid database name\nValid options are: ${availableDBsStr}` )
+        console.log(`Invalid database name\nValid options are: ${availableDBsStr}`)
         return selectDB()
     }
 
@@ -48,30 +48,30 @@ async function selectDB(){
 }
 
 
-async function getDB(DBkey){
+async function getDB(DBkey) {
     const env = await envPromise
 
-    for(const DB of env["DBs"]){
-        if(DB["name"] == DBkey) return DB
+    for (const DB of env["DBs"]) {
+        if (DB["name"] == DBkey) return DB
     }
 }
 
 
-function createRow(DB, items){
+function createRow(DB, items) {
     const columns = DB["columns"] || []
-    const extraColumnAmt = Math.min(columns.length, items.length-1)
+    const extraColumnAmt = Math.min(columns.length, items.length - 1)
     const properties = {}
 
     addColumn(properties, "title", "title", items[0])
 
-    for(let i = 0; i < extraColumnAmt; i++)
+    for (let i = 0; i < extraColumnAmt; i++)
         addColumn(properties, columns[i], "rich_text", items[i + 1])
 
     pushNotion(DB, properties)
 }
 
 
-function addColumn(properties, name, type, content){
+function addColumn(properties, name, type, content) {
     properties[name] = {
         "type": type,
         [type]: [
@@ -81,7 +81,7 @@ function addColumn(properties, name, type, content){
 }
 
 
-async function pushNotion(DB, properties){
+async function pushNotion(DB, properties) {
     const notion = await notionPromise
 
     notion.pages.create({
