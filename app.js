@@ -1,13 +1,8 @@
 const { Client } = require("@notionhq/client")
 const fs = require('fs')
 const path = require('path')
-const express = require('express')
+const rl = require('readline-sync')
 
-const port = 3000;
-
-const app = express()
-const bodyParser = require('body-parser')
-app.use(bodyParser.text())
 
 
 const env = (function(){
@@ -21,25 +16,34 @@ const notion = new Client({
 })
 
 
-app.post('', (req, res) => {
-    const input = req.body
+function main(){
+    const DBname = selectDB()
+    const content = rl.question(`Content: `)
 
-    console.log("input:", input)
-    const response = processInput(input)
-    res.send(`input: ${input}\nresponse:${response}`)
-})
+    processInput(DBname, content)
+}
 
 
-function processInput(input){
-    const [DBkey, ...content] = input.split(' ')
-    const DB = getDB(DBkey)
+function selectDB(){
+    const availableDBs = env["DBs"].map(DB => DB["name"])
+    const availableDBsStr = availableDBs.join(", ")
+    const DB = rl.question(`Select DB (${availableDBsStr}): `)
 
-    if(DB == null) return "invalid DB"
+    const validDB = availableDBs.includes(DB)
+    if(!validDB){
+        console.log("Invalid DB!")
+        return selectDB()
+    }
 
-    const contentStr = content.join(" ")
-    const items = contentStr.split("|")
+    return DB
+}
+
+
+function processInput(DBname, content){
+    const DB = getDB(DBname)
+
+    const items = content.split("|")
     createRow(DB, items)
-
 
     return "success"
 }
@@ -53,13 +57,13 @@ function getDB(DBkey){
 
 
 function createRow(DB, items){
-    const columns = DB["columns"]
-    const createColumnAmt = Math.min(columns.length, items.length-1)
+    const columns = DB["columns"] || []
+    const extraColumnAmt = Math.min(columns.length, items.length-1)
     const properties = {}
 
     addColumn(properties, "title", "title", items[0])
 
-    for(let i = 0; i < createColumnAmt; i++)
+    for(let i = 0; i < extraColumnAmt; i++)
         addColumn(properties, columns[i], "rich_text", items[i + 1])
 
         
@@ -84,6 +88,4 @@ function addColumn(properties, name, type, content){
 
 // ========== START ==========
 
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-})
+main()
