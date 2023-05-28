@@ -4,35 +4,43 @@ const path = require('path')
 const rl = require('readline-sync')
 
 
-
-const env = (function(){
+const envPromise = (async function(){
     const envPath = path.join(__dirname, 'env.json')
     const envStr = fs.readFileSync(envPath, 'utf8').trim()
     return JSON.parse(envStr)
 })()
 
-const notion = new Client({
-  auth: env["secret"],
-})
+const notionPromise = (async function(){
+    const env = await envPromise
+    return new Client({
+        auth: env["secret"],
+    })
+})()
 
 
 
-function main(){
-    const DBname = selectDB()
+async function main(){
+    const DBname = await selectDB()
+    const DBpromise = getDB(DBname)
+
     const content = rl.question(`Content: `)
+    const items = content.split("|")
 
-    processInput(DBname, content)
+    const DB = await DBpromise
+    createRow(DB, items)
 }
 
 
-function selectDB(){
-    const availableDBs = env["DBs"].map(DB => DB["name"])
-    const availableDBsStr = availableDBs.join(", ")
-    const DB = rl.question(`Select DB (${availableDBsStr}): `)
+async function selectDB(){
+    const DB = rl.question(`Select DB: `)
 
-    const validDB = availableDBs.includes(DB)
-    if(!validDB){
-        console.log("Invalid DB!")
+    const env = await envPromise
+    const availableDBs = env["DBs"].map(DB => DB["name"])
+
+    const isDBvalid = availableDBs.includes(DB)
+    if(!isDBvalid){
+        const availableDBsStr = availableDBs.join(", ")
+        console.log(`Invalid database name\nValid options are: ${availableDBsStr}` )
         return selectDB()
     }
 
@@ -40,17 +48,9 @@ function selectDB(){
 }
 
 
-function processInput(DBname, content){
-    const DB = getDB(DBname)
+async function getDB(DBkey){
+    const env = await envPromise
 
-    const items = content.split("|")
-    createRow(DB, items)
-
-    return "success"
-}
-
-
-function getDB(DBkey){
     for(const DB of env["DBs"]){
         if(DB["name"] == DBkey) return DB
     }
@@ -67,13 +67,7 @@ function createRow(DB, items){
     for(let i = 0; i < extraColumnAmt; i++)
         addColumn(properties, columns[i], "rich_text", items[i + 1])
 
-        
-    notion.pages.create({
-        properties: properties,
-        parent: {
-            database_id: DB["id"]
-        }
-    })
+    pushNotion(DB, properties)
 }
 
 
@@ -85,6 +79,19 @@ function addColumn(properties, name, type, content){
         ]
     }
 }
+
+
+async function pushNotion(DB, properties){
+    const notion = await notionPromise
+
+    notion.pages.create({
+        properties: properties,
+        parent: {
+            database_id: DB["id"]
+        }
+    })
+}
+
 
 
 // ========== START ==========
