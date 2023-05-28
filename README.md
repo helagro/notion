@@ -1,1 +1,23 @@
-**example:** curl -X POST -H "Content-Type: text/plain" --data "t Hello, world" http://localhost:3000
+
+This is a simple tool for creating rows in Notion databases
+
+## Example env.json
+
+```json
+{
+    "secret": "",
+    "DBs": [
+        {
+            "name": "e",
+            "id": ""
+        },
+        {
+            "name": "t",
+            "id": "",
+            "columns": [
+                "dOQS"
+            ]
+        }
+    ]
+}
+```
