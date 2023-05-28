@@ -1,7 +1,12 @@
 const { Client } = require("@notionhq/client")
 const fs = require('fs')
 const path = require('path')
-const rl = require('readline-sync')
+
+const rl = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
+
 
 
 const envPromise = (async function () {
@@ -23,16 +28,18 @@ async function main() {
     const DBname = await selectDB()
     const DBpromise = getDB(DBname)
 
-    const content = rl.question(`Content: `)
+    const content = await readLine("Content: ")
     const items = content.split("|")
 
     const DB = await DBpromise
     createRow(DB, items)
+
+    rl.close();
 }
 
 
 async function selectDB() {
-    const DB = rl.question(`Select DB: `)
+    const DB = await readLine("Select DB: ")
 
     const env = await envPromise
     const availableDBs = env["DBs"].map(DB => DB["name"])
@@ -45,6 +52,15 @@ async function selectDB() {
     }
 
     return DB
+}
+
+
+function readLine(prompt){
+    return new Promise(resolve => {
+        rl.question(prompt, answer => {
+            resolve(answer)
+        })
+    })
 }
 
 
