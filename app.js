@@ -1,12 +1,7 @@
 const { Client } = require("@notionhq/client")
 const fs = require('fs')
 const path = require('path')
-
-const rl = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout
-})
-
+const inputReader = require('./inputReader.js')
 
 
 const envPromise = (async function () {
@@ -28,40 +23,37 @@ async function main() {
     const DBname = await selectDB()
     const DBpromise = getDB(DBname)
 
-    const content = await readLine("Content: ")
+    const content = await inputReader.readLine("Content: ")
     const items = content.split("|")
 
     const DB = await DBpromise
     createRow(DB, items)
 
-    rl.close();
+    inputReader.close()
 }
 
 
 async function selectDB() {
-    const DB = await readLine("Select DB: ")
+    let DB = await inputReader.getSelectedDB()
 
     const env = await envPromise
     const availableDBs = env["DBs"].map(DB => DB["name"])
 
-    const isDBvalid = availableDBs.includes(DB)
-    if (!isDBvalid) {
-        const availableDBsStr = availableDBs.join(", ")
+    let isDBvalid = availableDBs.includes(DB)
+    if(isDBvalid) return DB
+
+    const availableDBsStr = availableDBs.join(", ")
+
+    while (!isDBvalid) {
         console.log(`Invalid database name\nValid options are: ${availableDBsStr}`)
-        return selectDB()
+
+        DB = await inputReader.readLine(inputReader.SELECT_DB_PROMPT)
+        isDBvalid = availableDBs.includes(DB)
     }
 
     return DB
 }
 
-
-function readLine(prompt){
-    return new Promise(resolve => {
-        rl.question(prompt, answer => {
-            resolve(answer)
-        })
-    })
-}
 
 
 async function getDB(DBkey) {
