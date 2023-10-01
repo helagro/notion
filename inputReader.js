@@ -1,6 +1,7 @@
 const readline = require('readline')
 
 const SELECT_DB_PROMPT = "Select DB: "
+let wasProvidedArgument
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -16,7 +17,9 @@ async function getSelectedDB() {
 
 function getArgStr(){
     const args = process.argv.slice(2)
-    return args.join(' ')
+    const arg = args.join(' ')
+    wasProvidedArgument = (Boolean(arg))
+    return arg
 }
 
 function readLine(prompt){
@@ -27,6 +30,10 @@ function readLine(prompt){
     })
 }
 
+function providedArgument(){
+    return wasProvidedArgument
+}
+
 function close(){
     rl.close()
 }
@@ -35,5 +42,6 @@ module.exports = {
     SELECT_DB_PROMPT,
     getSelectedDB, 
     readLine,
+    providedArgument,
     close
 }

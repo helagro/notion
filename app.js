@@ -20,14 +20,18 @@ const notionPromise = (async function () {
 
 
 async function main() {
-    const DBname = await selectDB()
-    const DBpromise = getDB(DBname)
 
-    const content = await inputReader.readLine("Content: ")
-    const items = content.split("|")
+    do{
+        const DBname = await selectDB()
+        const DBpromise = getDB(DBname)
 
-    const DB = await DBpromise
-    createRow(DB, items)
+        const content = await inputReader.readLine("Content: ")
+        const items = content.split("|")
+
+        const DB = await DBpromise
+        createRow(DB, items)
+        console.log()
+    } while(! inputReader.providedArgument())
 
     inputReader.close()
 }
@@ -53,7 +57,6 @@ async function selectDB() {
 
     return DB
 }
-
 
 
 async function getDB(DBkey) {
@@ -98,6 +101,7 @@ async function pushNotion(DB, properties) {
             database_id: DB["id"]
         }
     })
+
 }
 
 
